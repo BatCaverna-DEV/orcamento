@@ -134,7 +134,7 @@ Todas as rotas, exceto registrar/login, exigem `Authorization: Bearer <token>` e
 ## Frontend
 
 - **Login/Cadastro** (`/login`, `/cadastro`): rotas públicas (`meta.publica`), sem navbar. Login aceita usuário ou e-mail. `?voltar=` só aceita caminho interno.
-- **Planilha** (`/`, HomeView): cabeçalho com saudação, botões *Nova despesa* / *Abrir mês* e resumo do mês atual (ou último aberto): Salário, Fixas, Dívidas, A pagar, Saldo previsto.
+- **Planilha** (`/`, HomeView): cabeçalho com saudação, botão *Abrir mês* (despesas novas são cadastradas na tela Despesas) e resumo do mês atual (ou último aberto): Salário, Fixas, Dívidas, A pagar, Saldo previsto.
   - Linhas: Salário; grupo **Fixas** e grupo **Dívidas** (linha de cabeçalho cinza com o total do grupo em cada mês, seguida das despesas — clique = editar); rodapé com Total, Pago, A pagar, Saldo.
   - Totais por grupo usam a mesma regra do previsto (pagas pelo valor pago, pendentes pelo valor da despesa).
   - Colunas: meses abertos em ordem; mês atual destacado em verde; menu ⋮ por mês (editar salário, fechar/reabrir, excluir).

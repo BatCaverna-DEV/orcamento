@@ -13,9 +13,6 @@
             <template v-else>Cadastre suas despesas e abra os meses para acompanhar o orçamento.</template>
           </p>
         </div>
-        <BButton variant="outline-success" @click="novaDespesa">
-          <i class="bi bi-plus-lg me-1"></i> Nova despesa
-        </BButton>
         <BButton variant="success" @click="abrirMes">
           <i class="bi bi-calendar-plus me-1"></i> Abrir mês
         </BButton>
@@ -41,7 +38,10 @@
     <div v-else-if="!despesas.length && !meses.length" class="card-orc p-5 text-center text-secondary">
       <i class="bi bi-table display-5"></i>
       <p class="mt-3 mb-1 fs-5">Sua planilha está vazia.</p>
-      <p class="mb-0">Comece cadastrando uma <strong>despesa</strong> e depois <strong>abra um mês</strong>.</p>
+      <p class="mb-0">
+        Comece cadastrando suas despesas em <RouterLink :to="{ name: 'despesas' }" class="link-success">Despesas</RouterLink>
+        e depois <strong>abra um mês</strong>.
+      </p>
     </div>
 
     <!-- Planilha: despesas nas linhas, meses nas colunas -->
@@ -100,6 +100,22 @@
               </td>
             </tr>
 
+            <!-- Saldo previsto (salário − despesas previstas) -->
+            <tr class="linha-saldo-previsto">
+              <th class="col-despesa">
+                <i class="bi bi-piggy-bank me-2 text-secondary"></i>Saldo previsto
+              </th>
+              <td v-if="!meses.length"></td>
+              <td
+                v-for="mes in meses"
+                :key="mes.id"
+                class="text-end fw-bold"
+                :class="[totais[mes.id].saldo >= 0 ? 'text-receita' : 'text-despesa', { 'mes-atual': mes.descricao === hoje }]"
+              >
+                {{ formatarValor(totais[mes.id].saldo) }}
+              </td>
+            </tr>
+
             <!-- Despesas -->
             <tr v-if="!despesas.length">
               <th class="col-despesa fw-normal text-secondary small">Nenhuma despesa cadastrada.</th>
@@ -107,10 +123,10 @@
             </tr>
             <template v-for="grupo in grupos" :key="grupo.tipo">
             <!-- Cabeçalho do grupo com o total previsto do grupo em cada mês -->
-            <tr class="linha-grupo">
+            <tr class="linha-grupo" :class="grupo.classe">
               <th class="col-despesa">
                 <i :class="grupo.icone" class="me-2"></i>{{ grupo.nome }}
-                <small class="text-secondary fw-normal">({{ grupo.despesas.length }})</small>
+                <span class="badge rounded-pill contador ms-1">{{ grupo.despesas.length }}</span>
               </th>
               <td v-if="!meses.length"></td>
               <td
@@ -122,7 +138,7 @@
                 {{ formatarValor(totais[mes.id].porTipo[grupo.tipo]) }}
               </td>
             </tr>
-            <tr v-for="despesa in grupo.despesas" :key="despesa.id">
+            <tr v-for="(despesa, i) in grupo.despesas" :key="despesa.id" :class="{ 'linha-zebra': i % 2 === 1 }">
               <th class="col-despesa fw-normal clicavel ps-4" @click="editarDespesa(despesa)">
                 <div class="d-flex align-items-baseline gap-2" :title="`${despesa.descricao} — R$ ${formatarValor(despesa.valor)} · ${vigencia(despesa)}`">
                   <span class="fw-medium text-truncate">{{ despesa.descricao }}</span>
@@ -283,8 +299,8 @@ const despesaPorId = computed(() => new Map(despesas.value.map((d) => [d.id, d])
 //Linhas da planilha agrupadas por tipo (grupos vazios não aparecem)
 const grupos = computed(() =>
   [
-    { tipo: FIXA, nome: 'Fixas', icone: 'bi bi-arrow-repeat text-secondary' },
-    { tipo: DIVIDA, nome: 'Dívidas', icone: 'bi bi-credit-card text-danger' },
+    { tipo: FIXA, nome: 'Fixas', icone: 'bi bi-arrow-repeat', classe: 'grupo-fixa' },
+    { tipo: DIVIDA, nome: 'Dívidas', icone: 'bi bi-credit-card', classe: 'grupo-divida' },
   ]
     .map((g) => ({ ...g, despesas: despesas.value.filter((d) => d.tipo === g.tipo) }))
     .filter((g) => g.despesas.length)
@@ -332,11 +348,6 @@ const vigencia = (d) => (d.fim ? `${mesAno(d.inicio)} a ${mesAno(d.fim)}` : `des
 //Despesas
 const modalDespesa = ref(false)
 const despesaSelecionada = ref(null)
-
-function novaDespesa() {
-  despesaSelecionada.value = null
-  modalDespesa.value = true
-}
 
 function editarDespesa(despesa) {
   despesaSelecionada.value = despesa
@@ -451,13 +462,59 @@ function abrirConta(mes, despesa) {
   color: var(--orc-verde-escuro);
 }
 
+/* Cabeçalho dos grupos Fixas / Dívidas: faixa colorida, texto em destaque */
 .linha-grupo > * {
-  background-color: #f3f4f2;
+  --cor-grupo: #3b6fb6;
+  --fundo-grupo: #e6eef9;
+  background-color: var(--fundo-grupo) !important;
+  color: var(--cor-grupo) !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   font-size: 0.9rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  border-top: 2px solid var(--cor-grupo);
+  border-bottom: 1px solid var(--cor-grupo);
+}
+
+.linha-grupo > th:first-child {
+  box-shadow: inset 5px 0 0 var(--cor-grupo);
+}
+
+.grupo-divida > * {
+  --cor-grupo: #c62828;
+  --fundo-grupo: #fdeaea;
+}
+
+.linha-grupo .contador {
+  background-color: var(--cor-grupo);
+  color: #fff;
+  font-size: 0.7rem;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+/* Linhas alternadas das despesas */
+.linha-zebra > * {
+  --bs-table-bg: #e9ece6;
+}
+
+.linha-zebra > .col-despesa {
+  background-color: #e9ece6;
+}
+
+.linha-zebra > .mes-atual {
+  background-color: rgba(25, 197, 82, 0.13) !important;
 }
 
 .linha-salario > * {
   background-color: #fbfdfb;
+}
+
+.linha-saldo-previsto > * {
+  background-color: #fbfdfb;
+  border-bottom: 2px solid var(--orc-borda);
 }
 
 .planilha tfoot > tr > * {
