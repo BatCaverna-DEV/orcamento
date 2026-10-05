@@ -1,0 +1,60 @@
+:root {
+  --orc-verde: #19c552;
+  --orc-verde-escuro: #12a443;
+  --orc-verde-claro: #e3f8ea;
+  --orc-fundo: #f3f4f2;
+  --orc-card: #fdfdfb;
+  --orc-borda: #ececea;
+  --orc-azul: #1f5fd6;
+  --orc-vermelho: #e3262b;
+
+  --bs-primary: var(--orc-verde);
+  --bs-primary-rgb: 25, 197, 82;
+  --bs-body-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--orc-fundo);
+  color: #2b2b2b;
+}
+
+.card-orc {
+  background-color: var(--orc-card);
+  border: 1px solid var(--orc-borda);
+  border-radius: 0.75rem;
+}
+
+.text-receita {
+  color: var(--orc-verde-escuro);
+}
+
+.text-despesa {
+  color: var(--orc-vermelho);
+}
+
+.text-saldo {
+  color: var(--orc-azul);
+}
+
+.form-check-input:checked {
+  background-color: var(--orc-verde);
+  border-color: var(--orc-verde);
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--orc-verde);
+  box-shadow: 0 0 0 0.25rem rgba(25, 197, 82, 0.2);
+}
+
+.btn-verde-claro {
+  background-color: var(--orc-verde-claro);
+  color: var(--orc-verde-escuro);
+  border: none;
+}
+
+.btn-verde-claro:hover {
+  background-color: #cdf2d9;
+  color: var(--orc-verde-escuro);
+}
