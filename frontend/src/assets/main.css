@@ -24,16 +24,17 @@ body {
   border-radius: 0.75rem;
 }
 
+/* !important: as células de .table do Bootstrap definem a própria cor de texto */
 .text-receita {
-  color: var(--orc-verde-escuro);
+  color: var(--orc-verde-escuro) !important;
 }
 
 .text-despesa {
-  color: var(--orc-vermelho);
+  color: var(--orc-vermelho) !important;
 }
 
 .text-saldo {
-  color: var(--orc-azul);
+  color: var(--orc-azul) !important;
 }
 
 .form-check-input:checked {
