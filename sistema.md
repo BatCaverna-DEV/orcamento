@@ -171,6 +171,28 @@ npm install
 npm run dev
 ```
 
+## Produção (VPS)
+
+- Servidor: `escolaplus-vps` (Ubuntu 24.04, `ssh escolaplus-vps`), código em `/root/github/orcamento` (clone do GitHub).
+- API: pm2 com nome **`ORCAMENTO:3007`** (padrão `PROJETO:PORTA` dos outros apps), Node 22 via nvm (`/root/.nvm/versions/node/v22.18.0/bin`), `PORT=3007` no `backend/.env` de lá. Acesso: `http://69.62.97.146:3007` (firewall desativado; sem HTTPS/proxy).
+- Banco: MySQL 8 local da VPS, banco `orcamento` (tabelas criadas pelo `sync()` na primeira subida).
+- `pm2 save` feito e serviço `pm2-root` habilitado → volta sozinha após reboot.
+- Atualizar: `cd /root/github/orcamento && git pull && cd backend && npm install && pm2 restart "ORCAMENTO:3007"`.
+- Atenção: em sessão SSH não interativa o `pm2`/`node` do nvm não está no PATH — use `bash -ic` ou exporte o PATH acima.
+- API pública via proxy do Apache (vhost `batcaverna.site` em `/etc/apache2/sites-enabled/servidor.conf`): **`https://batcaverna.site/api-orcamento`** → `localhost:3007`.
+
+### Frontend em produção — https://batcaverna.site/orcamento/
+- Arquivos estáticos em `/var/www/html/orcamento` (DocumentRoot do vhost é `/var/www/html`).
+- `vite.config.js`: `base: '/orcamento/'` só no `build` (no `dev` continua `/`). O router já usa `import.meta.env.BASE_URL`.
+- `frontend/.env.production`: `VITE_API_URL=https://batcaverna.site/api-orcamento` (mesmo domínio → sem CORS nem conteúdo misto). Usado só pelo `npm run build`.
+- `frontend/.env.development`: `VITE_API_URL=http://localhost:3000` — usado pelo `npm run dev` (API local).
+- `frontend/public/.htaccess`: fallback de SPA (rotas como `/orcamento/despesas` caem no `index.html`), igual aos outros apps da pasta.
+- Publicar uma nova versão (no Windows, Git Bash):
+  ```bash
+  cd frontend && npm run build
+  cd dist && tar -cf - . | ssh escolaplus-vps 'rm -rf /var/www/html/orcamento/* && tar -xf - -C /var/www/html/orcamento && chown -R root:root /var/www/html/orcamento'
+  ```
+
 ## Estado atual / próximos passos
 - [x] Models do DER atual + associações
 - [x] Login/cadastro com JWT e senha em bcrypt; dados isolados por usuário
